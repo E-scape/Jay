@@ -1,8 +1,6 @@
 import os, pygame
 from google.cloud import texttospeech
-
-#local_config를 config로 변경하세요
-from local_config import mp3_path, CREDENTIALS_PATH
+from config import mp3_path, CREDENTIALS_PATH
 
 # Set Google Cloud credentials environment variable
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH

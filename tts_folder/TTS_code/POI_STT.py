@@ -1,7 +1,7 @@
 import queue, sys, os, pyaudio, threading
 from playsound import playsound
 from google.cloud import speech
-from local_config import CREDENTIALS_PATH, stt_startsound, stt_endsound
+from config import CREDENTIALS_PATH, stt_startsound, stt_endsound
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH
 

@@ -1,7 +1,7 @@
 import requests, os, sys, pygame
 from POI_TTS import poi_tts
 from POI_STT import main as stt_main
-from local_config import positive_responses, negative_responses, Tmap_key
+from config import positive_responses, negative_responses, Tmap_key
 
 import requests, urllib, pprint
 
