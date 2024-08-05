@@ -1,4 +1,5 @@
-import requests, os, sys, pygame
+import requests, os, sys, pygame, time
+from function import *
 from POI_TTS import poi_tts
 from POI_STT import main as stt_main
 from config import positive_responses, negative_responses, Tmap_key
@@ -246,6 +247,23 @@ if route_response.status_code == 200:
 
     for i in range(len(description_list)):
         print(description_list[i], coordinates_list[i])
+
+        for x in range(len(description_list)):
+            target_lat, target_lon = coordinates_list[x][1], coordinates_list[x][0]
+
+            while True:
+                my_lat, my_lon = get_current_position()
+                if my_lat is None or my_lon is None:
+                    print("GPS 신호를 찾을 수 없습니다. 다시 시도합니다.")
+                    time.sleep(1)
+                    continue
+
+                if check_proximity(my_lat, my_lon, target_lat, target_lon):
+                    if x + 1 < len(description_list):
+                        poi_tts(f"{description_list[x+1]}", f"{description_list[x+1]}.mp3")
+                    break
+                
+                time.sleep(3)  # 3초 대기 후 다시 검사
 
 else:
     print(f"Error: {route_response.status_code}")
