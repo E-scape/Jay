@@ -1,10 +1,10 @@
-import requests, os, sys, pygame, time
+import requests, os, sys, pygame, time, requests, urllib, pprint
 from function import *
 from POI_TTS import poi_tts
 from POI_STT import main as stt_main
 from config import positive_responses, negative_responses, Tmap_key
 
-import requests, urllib, pprint
+
 
 pygame.init()
 while True:
@@ -195,7 +195,7 @@ while True:
             continue #목적지 다시 입력받기
 
 
-pygame.quit()
+
 
 print(choice_name, choice_lat, choice_lon)    
 
@@ -264,6 +264,9 @@ if route_response.status_code == 200:
                     break
                 
                 time.sleep(3)  # 3초 대기 후 다시 검사
+
+    
+    pygame.quit()
 
 else:
     print(f"Error: {route_response.status_code}")
