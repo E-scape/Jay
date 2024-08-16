@@ -265,6 +265,16 @@ if route_response.status_code == 200:
         target_lon, target_lat = map(float, coordinates_list[x+1])
         print(f"안내점 좌표: {target_lon}, {target_lat}")
 
+        float(now_lat), float(now_lon) = get_current_position(gps_thread)
+
+        total_distance = haversine(now_lat, now_lon, target_lat, target_lon)
+        print(f"안내점까지의 전체 거리: {total_distance:.2f} 미터")
+
+        next_announcement_distance = total_distance - 30
+
+        now_lat = 0
+        now_lon = 0
+
         while True:
             now_lat, now_lon = get_current_position(gps_thread)
 
@@ -279,6 +289,14 @@ if route_response.status_code == 200:
                 print(f"안내점 좌표: {target_lat}, {target_lon}")
                 print(f"내 좌표 : {now_lat}, {now_lon}\n")
                 
+                distance_to_target = haversine(now_lat, now_lon, target_lat, target_lon)
+                print(f"남은 거리: {distance_to_target:.2f} 미터")
+
+                if distance_to_target <= next_announcement_distance:
+                    poi_tts(f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.", f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.")
+                    # 다음 알림 거리 설정 (30m 간격)
+                    next_announcement_distance = distance_to_target - 30
+
                 if check_proximity(now_lat, now_lon, target_lat, target_lon):#현재위치와 안내점의 좌표가 10m 이내이면 break
                     break
 
