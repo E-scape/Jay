@@ -12,16 +12,13 @@ gps_thread.start()
 # 초기 위치 설정 (실제 GPS 데이터로 대체)
 print("GPS 값을 불러옵니다")
 while True:
-    my_lat, my_lon = (gps_thread)
+    my_lat, my_lon = get_current_position(gps_thread)
     if my_lat is not None and my_lon is not None:
         print(f"초기 GPS 위치: 위도 {my_lat}, 경도 {my_lon}")
         break
     else:
         print("GPS 신호를 기다리는 중...")
         time.sleep(1)
-
-gps_thread.stop()
-gps_thread.join()
 
 route_url = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function"
 
@@ -68,14 +65,23 @@ if route_response.status_code == 200:
     
     print("gps 좌표 2번째 찾는중")
 
-    gps_thread = GPSPoller()
-    gps_thread.start()
+
 
     for x in range(len(description_list)):#안내점 리스트 요소의 개수만큼 반복
         poi_tts(f"{description_list[x]}", f"{description_list[x]}")
 
         target_lon, target_lat = map(float, coordinates_list[x+1])
         print(f"안내점 좌표: {target_lon}, {target_lat}")
+
+        float(now_lat), float(now_lon) = get_current_position(gps_thread)
+
+        total_distance = haversine(now_lat, now_lon, target_lat, target_lon)
+        print(f"안내점까지의 전체 거리: {total_distance:.2f} 미터")
+
+        next_announcement_distance = total_distance - 30
+
+        now_lat = 0
+        now_lon = 0
 
         while True:
             now_lat, now_lon = get_current_position(gps_thread)
@@ -91,10 +97,18 @@ if route_response.status_code == 200:
                 print(f"안내점 좌표: {target_lat}, {target_lon}")
                 print(f"내 좌표 : {now_lat}, {now_lon}\n")
                 
+                distance_to_target = haversine(now_lat, now_lon, target_lat, target_lon)
+                print(f"남은 거리: {distance_to_target:.2f} 미터")
+
+                if distance_to_target <= next_announcement_distance:
+                    poi_tts(f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.", f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.")
+                    # 다음 알림 거리 설정 (30m 간격)
+                    next_announcement_distance = distance_to_target - 30
+
                 if check_proximity(now_lat, now_lon, target_lat, target_lon):#현재위치와 안내점의 좌표가 10m 이내이면 break
                     break
-                
-                time.sleep(0.2)  # 더 짧은 간격으로 위치 체크
+
+                time.sleep(0.05)  # 더 짧은 간격으로 위치 체크
 
 else:
     print(f"Error: {route_response.status_code}")

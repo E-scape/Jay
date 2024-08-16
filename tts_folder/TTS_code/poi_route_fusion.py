@@ -195,10 +195,22 @@ while True:
             continue #목적지 다시 입력받기
 
 
-
-
 print(choice_name, choice_lat, choice_lon)    
 
+
+gps_thread = GPSPoller()
+gps_thread.start()
+
+# 초기 위치 설정 (실제 GPS 데이터로 대체)
+print("GPS 값을 불러옵니다")
+while True:
+    my_lat, my_lon = get_current_position(gps_thread)
+    if my_lat is not None and my_lon is not None:
+        print(f"초기 GPS 위치: 위도 {my_lat}, 경도 {my_lon}")
+        break
+    else:
+        print("GPS 신호를 기다리는 중...")
+        time.sleep(1)
 
 route_url = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function"
 
@@ -207,69 +219,81 @@ headers = {
     "appKey": Tmap_key
 }
 
-my_lon = 127.12879180000004
-my_lat = 37.459713500071885
 
 route_params = {
-    "startX": my_lon,#내 위치 받도록 수정해야함#경도
-    "startY": my_lat,#내 위치 받도록 수정해야함#위도
+    "startX": my_lon,
+    "startY": my_lat,
     "angle": 20,
     "speed": 1,
-    "endX": choice_lon,
-    "endY": choice_lat,
-    #경유지 : "passList": "126.92774822,37.55395475_126.92577620,37.55337145",
+    "endX": choice_lat,  # 목적지 
+    "endY": choice_lon,  # 목적지
     "reqCoordType": "WGS84GEO",
-    "startName": "%EB%82%B4%EC%9C%84%EC%B9%98",#내 위치
-    "endName": "%EB%AA%A9%EC%A0%81%EC%A7%80",#목적지
+    "startName": "%EB%82%B4%EC%9C%84%EC%B9%98",
+    "endName": "%EB%AA%A9%EC%A0%81%EC%A7%80",
     "searchOption": "0",
     "resCoordType": "WGS84GEO",
     "sort": "index"
 }
 
 route_response = requests.post(route_url, json=route_params, headers=headers)
-         
-index_list =[]
+
+index_list = []
 description_list = []
 coordinates_list = []
 
 if route_response.status_code == 200:
     routedata = route_response.json()
-    #pprint.pprint(routedata)
     for feature in routedata["features"]:
         if feature["geometry"]["type"] == "Point":
             description = feature["properties"]["description"]
             coordinates = feature["geometry"]["coordinates"]
-            index= feature["properties"]["index"]
+            index = feature["properties"]["index"]
             description_list.append(description)
             coordinates_list.append(coordinates)
             index_list.append(index)
-            #print(description)
 
-    for i in range(len(description_list)):
-        print(description_list[i], coordinates_list[i])
-
-        for x in range(len(description_list)):
-            target_lat, target_lon = coordinates_list[x][1], coordinates_list[x][0]
-
-            while True:
-                my_lat, my_lon = get_current_position()
-                if my_lat is None or my_lon is None:
-                    print("GPS 신호를 찾을 수 없습니다. 다시 시도합니다.")
-                    time.sleep(1)
-                    continue
-
-                if check_proximity(my_lat, my_lon, target_lat, target_lon):
-                    if x + 1 < len(description_list):
-                        poi_tts(f"{description_list[x+1]}", f"{description_list[x+1]}.mp3")
-                    break
-                
-                time.sleep(3)  # 3초 대기 후 다시 검사
-
+    for i, (description, coordinates) in enumerate(zip(description_list, coordinates_list)):
+        print(f"{description} {coordinates}")
     
-    pygame.quit()
+    print("gps 좌표 2번째 찾는중")
+
+
+
+    for x in range(len(description_list)):#안내점 리스트 요소의 개수만큼 반복
+        poi_tts(f"{description_list[x]}", f"{description_list[x]}")
+
+        target_lon, target_lat = map(float, coordinates_list[x+1])
+        print(f"안내점 좌표: {target_lon}, {target_lat}")
+
+        while True:
+            now_lat, now_lon = get_current_position(gps_thread)
+
+            if now_lat is None or now_lon is None:#GPS 좌료를 인식 할 수 없을 때
+                print("GPS 신호를 찾을 수 없습니다. 다시 시도합니다.")                                                              
+                poi_tts("GPS 신호를 찾을 수 없습니다.", "GPS 신호를 찾을 수 없습니다")
+                time.sleep(1)
+                continue
+
+            else:#GPS 좌표를 인식하면
+                now_lat, now_lon = float(now_lat), float(now_lon)
+                print(f"안내점 좌표: {target_lat}, {target_lon}")
+                print(f"내 좌표 : {now_lat}, {now_lon}\n")
+                
+                if check_proximity(now_lat, now_lon, target_lat, target_lon):#현재위치와 안내점의 좌표가 10m 이내이면 break
+                    break
+
+                time.sleep(0.05)  # 더 짧은 간격으로 위치 체크
 
 else:
     print(f"Error: {route_response.status_code}")
+
+# 프로그램 종료 시 GPS 스레드 정지
+    gps_thread.stop()
+    gps_thread.join()
+    
+    pygame.quit()
+
+
 
 '''
 class coordinate:
