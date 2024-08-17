@@ -73,8 +73,8 @@ if route_response.status_code == 200:
         target_lon, target_lat = map(float, coordinates_list[x+1])
         print(f"안내점 좌표: {target_lon}, {target_lat}")
 
-        float(now_lat), float(now_lon) = get_current_position(gps_thread)
-
+        now_lat, now_lon = get_current_position(gps_thread)
+        float(now_lat), float(now_lon) = now_lat, now_lon
         total_distance = haversine(now_lat, now_lon, target_lat, target_lon)
         print(f"안내점까지의 전체 거리: {total_distance:.2f} 미터")
 
