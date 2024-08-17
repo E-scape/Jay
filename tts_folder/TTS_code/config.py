@@ -1,17 +1,17 @@
 #POI_TTS.py, POI_STT.py
-CREDENTIALS_PATH = r"<your_path>(gcloud_credentials_path)/Json_file/~~.json"
+CREDENTIALS_PATH = r"/home/escape/project/Jay/tts_folder/Json_file/TTS.json"
 
 #POI_TTS.py
-mp3_path = r"<your_path>/tts_folder/TTS_mp3_file"
+mp3_path = r"/home/escape/project/Jay/tts_folder/TTS_mp3_file"
 
 #POI_STT.py
-stt_startsound = r"<your_path>/stt_start,end_sound/stt_start.mp3"
-stt_endsound = r"<your_path>/stt_start,end_sound/stt_end.mp3"
+stt_startsound = r"/home/escape/project/Jay/tts_folder/stt_start,end_sound/stt_start.mp3"
+stt_endsound = r"/home/escape/project/Jay/tts_folder/stt_start,end_sound/stt_end.mp3"
 
 
 
 #poi_route_fusion.py
-Tmap_key = "Tmap_api_key"
+Tmap_key = "RU6XWlW2wb8w2M4BljnMb9dIexNUfcvhaG2zWtaz"
 
 positive_responses = {
     "네", "예", "넹", "넵", "어", "응", "그래", "얍", "좋아", "yes", "네요",

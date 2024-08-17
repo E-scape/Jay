@@ -68,7 +68,7 @@ if route_response.status_code == 200:
 
 
     for x in range(len(description_list)):#안내점 리스트 요소의 개수만큼 반복
-        poi_tts(f"{description_list[x]}", f"{description_list[x]}")
+        poi_tts(f"{description_list[x]}", f"{description_list[x]}.wav")
 
         target_lon, target_lat = map(float, coordinates_list[x+1])
         print(f"안내점 좌표: {target_lon}, {target_lat}")
@@ -88,7 +88,7 @@ if route_response.status_code == 200:
 
             if now_lat is None or now_lon is None:#GPS 좌료를 인식 할 수 없을 때
                 print("GPS 신호를 찾을 수 없습니다. 다시 시도합니다.")                                                              
-                poi_tts("GPS 신호를 찾을 수 없습니다.", "GPS 신호를 찾을 수 없습니다")
+                poi_tts("GPS 신호를 찾을 수 없습니다.", "GPS 신호를 찾을 수 없습니다.wav")
                 time.sleep(1)
                 continue
 
@@ -101,7 +101,7 @@ if route_response.status_code == 200:
                 print(f"남은 거리: {distance_to_target:.2f} 미터")
 
                 if distance_to_target <= next_announcement_distance:
-                    poi_tts(f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.", f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.")
+                    poi_tts(f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.", f"다음 안내점까지 {int(distance_to_target)}미터 남았습니다.wav")
                     # 다음 알림 거리 설정 (30m 간격)
                     next_announcement_distance = distance_to_target - 30
 

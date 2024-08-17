@@ -1,4 +1,5 @@
-import os, pygame
+import os, time
+from playsound import playsound
 from google.cloud import texttospeech
 from config import mp3_path, CREDENTIALS_PATH
 
@@ -22,7 +23,7 @@ def poi_tts(text, output_file_name):
 
     # 텍스트를 MP3 파일로 변환
     audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3
+        audio_encoding=texttospeech.AudioEncoding.MP3#LINEAR16
     )
 
     # 택스트 음성 변환 수행
@@ -34,24 +35,14 @@ def poi_tts(text, output_file_name):
     with open(output_file_name, "wb") as out:
         out.write(response.audio_content)
         print(f'실행 파일: "{output_file_name}"')
-        
-
-    # Initialize pygame mixer
-    pygame.mixer.init()
-
-    # Load and play the output MP3 file
-    pygame.mixer.music.load(output_file_name)
-    pygame.mixer.music.play()
-
-    # Wait until the sound finishes playing
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
-
-    # Clean up pygame resources
-    pygame.mixer.quit()
-    #pygame.quit()
+    
+    playsound(f"{mp3_path}/{output_file_name}")
 
 # Example usage:
 if __name__ == "__main__":
-    poi_tts("복정역으로 안내할까요?", "이장소로 안내할까요.mp3")
+    
+    start = time.time()
+    poi_tts("복정역으로 안내할까요?", "이장소로 안내할까요")
+    end = time.time()
+    print(end-start)
     pass

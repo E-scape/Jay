@@ -37,6 +37,7 @@ def check_proximity(current_lat: float, current_lon: float, target_lat: float, t
     현재 위치가 목표 좌표 근처(일정 거리 이내)에 있는지 확인합니다.
     """
     distance = haversine(current_lat, current_lon, target_lat, target_lon)
+    print(f"거리: {distance}")
     return distance <= threshold
 
 '''def get_current_position():
@@ -84,7 +85,7 @@ class GPSPoller(threading.Thread):
                 if lat != 'n/a' and lon != 'n/a':
                     self.latitude = float(lat)
                     self.longitude = float(lon)
-            time.sleep(0.1)  # 짧은 대기 시간으로 CPU 사용량 감소
+            time.sleep(0.05)  # 짧은 대기 시간으로 CPU 사용량 감소
 
     def stop(self):
         self.running = False
@@ -95,7 +96,7 @@ class GPSPoller(threading.Thread):
 def get_current_position(gps_poller):
     lat, lon = gps_poller.latitude, gps_poller.longitude
     if lat is not None and lon is not None:
-        return float(lat), float(lon)
+        return float(f"{lat:.5f}"), float(f"{lon:.5f}")
     return None, None
 
 

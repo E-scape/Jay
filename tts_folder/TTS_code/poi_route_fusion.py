@@ -77,9 +77,7 @@ while True:
         choice_lat = ""
         choice_lon = ""
         choice = ""
-
-        #yes_answer = any(response in choice.lower() for response in positive_responses)
-        #no_answer = any(response in choice.lower() for response in negative_responses)
+        
         print(f"total_poi = {poi_count}")
 
         poi_tts(f"검색 결과, 총 {poi_count}개의 장소가 검색되었습니다.", "총 몇 개의 장소가 검색되었습니다.mp3")
@@ -221,12 +219,12 @@ headers = {
 
 
 route_params = {
-    "startX": my_lon,
-    "startY": my_lat,
+    "startX": my_lon, #startX -> lon
+    "startY": my_lat, #startY -> lat
     "angle": 20,
     "speed": 1,
-    "endX": choice_lat,  # 목적지 
-    "endY": choice_lon,  # 목적지
+    "endX":  choice_lon,# 목적지 
+    "endY": choice_lat,  # 목적지
     "reqCoordType": "WGS84GEO",
     "startName": "%EB%82%B4%EC%9C%84%EC%B9%98",
     "endName": "%EB%AA%A9%EC%A0%81%EC%A7%80",
@@ -265,7 +263,8 @@ if route_response.status_code == 200:
         target_lon, target_lat = map(float, coordinates_list[x+1])
         print(f"안내점 좌표: {target_lon}, {target_lat}")
 
-        float(now_lat), float(now_lon) = get_current_position(gps_thread)
+        now_lat, now_lon = get_current_position(gps_thread)
+        now_lat, now_lon = float(now_lat), float(now_lon)
 
         total_distance = haversine(now_lat, now_lon, target_lat, target_lon)
         print(f"안내점까지의 전체 거리: {total_distance:.2f} 미터")
