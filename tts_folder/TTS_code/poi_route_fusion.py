@@ -2,7 +2,7 @@ import requests, os, sys, pygame, time, requests, urllib, pprint
 from function import *
 from POI_TTS import poi_tts
 from POI_STT import main as stt_main
-from config import positive_responses, negative_responses, Tmap_key
+from config import *
 
 
 
@@ -80,7 +80,7 @@ while True:
         
         print(f"total_poi = {poi_count}")
 
-        poi_tts(f"검색 결과, 총 {poi_count}개의 장소가 검색되었습니다.", "총 몇 개의 장소가 검색되었습니다.mp3")
+        #poi_tts(f"검색 결과, 총 {poi_count}개의 장소가 검색되었습니다.", "총 몇 개의 장소가 검색되었습니다.mp3")
 
         if poi_count == 1:#검색 결과가 1개일 때
             while True:
@@ -97,7 +97,14 @@ while True:
                 
                 #응답이 No일 때 -> break -> else문으로 이동-> 장소 검색을 다시 함)
                 elif any(response in choice.lower() for response in negative_responses):
+                    choice_name = ""
                     poi_tts("다른 검색 결과가 없습니다. 목적지를 다시 말해주세요.", "결과가 없습니다 목적지를 다시 말해주세요.mp3")
+                    break
+                
+                elif any(response in choice.lower() for response in retry_responses):
+                    poi_tts("목적지를 다시 말해주세요.", "다시 검색합니다.mp3")
+                    choice = "oh_my_god_retry"
+                    choice_name = ""
                     break
 
                 else:
