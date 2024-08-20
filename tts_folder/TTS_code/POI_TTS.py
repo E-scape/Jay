@@ -8,8 +8,6 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH
 os.chdir(mp3_path)
 
 def poi_tts(text, output_file_name):
-    # pygame 초기화
-    #pygame.init()
 
     client = texttospeech.TextToSpeechClient()
 
@@ -31,11 +29,12 @@ def poi_tts(text, output_file_name):
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
 
-    # Save the audio content to the specified file
+    # 파일 저장
     with open(output_file_name, "wb") as out:
         out.write(response.audio_content)
         print(f'실행 파일: "{output_file_name}"')
-    
+
+    # 파일 재생
     playsound(f"{mp3_path}/{output_file_name}")
 
 # Example usage:
