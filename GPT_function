@@ -1,0 +1,144 @@
+# function.py
+import os
+import pygame
+import pyaudio
+import threading
+import cv2
+import base64
+from google.cloud import speech_v1p1beta1 as speech
+from google.cloud import texttospeech
+from config import *
+import requests
+
+
+def record_audio(frames, is_recording):
+    audio = pyaudio.PyAudio()
+    stream = audio.open(format=pyaudio.paInt16, channels=1,
+                        rate=44100, input=True,
+                        frames_per_buffer=1024)
+
+    while is_recording:
+        data = stream.read(1024)
+        frames.append(data)
+
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+
+def start_recording(frames, is_recording):
+    frames.clear()
+    is_recording[0] = True
+    threading.Thread(target=record_audio, args=(frames, is_recording)).start()
+
+def stop_recording(is_recording):
+    is_recording[0] = False
+
+async def transcribe_audio(audio_data, google_credentials_path):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_credentials_path
+    client = speech.SpeechClient()
+
+    audio = speech.RecognitionAudio(content=b"".join(audio_data))
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=44100,
+        language_code="ko-KR",
+    )
+
+    response = client.recognize(config=config, audio=audio)
+    transcription_result = ""
+    for result in response.results:
+        transcription_result = result.alternatives[0].transcript
+        print(transcription_result)
+    return transcription_result
+
+
+
+
+
+async def capture_image():
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        raise IOError("Cannot open webcam")
+
+    ret, frame = cap.read()
+    if ret:
+        file_path = 'captured_image.jpg'
+        cv2.imwrite(file_path, frame)
+    else:
+        raise ValueError("Failed to capture image from webcam")
+
+    cap.release()
+    cv2.destroyAllWindows()
+    return file_path
+
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+async def send_image_to_chatgpt(encoded_image, api_key, transcription_result):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    message_content = f"나는 시각장애인이야. {transcription_result} 대한민국 제주도 사투리로 설명해줘."
+
+    payload = {
+        "model": "gpt-4o",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": message_content
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{encoded_image}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "temperature": 0.2,  # 창의성과 일관성의 균형을 위해 0.7 설정
+        "top_p": 0.9,  # 확률 질량 기반의 응답 제한
+        "max_tokens": 80,  # 응답의 최대 길이
+        "n": 1,  # 생성할 응답의 수
+    }
+
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
+async def poi_tts(text, output_file_name, CREDENTIALS_PATH):
+    pygame.init()
+
+    client = texttospeech.TextToSpeechClient()
+
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="ko-KR", ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    )
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+
+    with open(output_file_name, "wb") as out:
+        out.write(response.audio_content)
+        print(f'Audio content written to file "{output_file_name}"')
+
+    pygame.mixer.init()
+    pygame.mixer.music.load(output_file_name)
+    pygame.mixer.music.play()
+
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
+
+    pygame.mixer.music.stop()
+    pygame.mixer.quit()
+    pygame.quit()
