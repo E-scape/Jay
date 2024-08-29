@@ -1,12 +1,10 @@
-import requests, os, sys, pygame, time, requests, urllib, pprint
+import requests, os, sys, time, requests, urllib, pprint
 from function import *
 from POI_TTS import poi_tts
 from POI_STT import main as stt_main
 from config import *
+from key import *
 
-
-
-pygame.init()
 while True:
     
     stt_path = os.path.abspath(r"C:/Users/alsrn/projects/escape/tts_folder/TTS,STT_code/POI_STT.py")
@@ -314,8 +312,7 @@ else:
 # 프로그램 종료 시 GPS 스레드 정지
     gps_thread.stop()
     gps_thread.join()
-    
-    pygame.quit()
+
 
 
 

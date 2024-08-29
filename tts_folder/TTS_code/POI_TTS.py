@@ -41,7 +41,7 @@ def poi_tts(text, output_file_name):
 if __name__ == "__main__":
     
     start = time.time()
-    poi_tts("복정역으로 안내할까요?", "이장소로 안내할까요")
+    poi_tts("복정역으로 안내할까요?", "is this place.mp3")
     end = time.time()
     print(end-start)
     pass
