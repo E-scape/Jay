@@ -4,7 +4,7 @@ from GPT_function import *
 from POI_TTS import poi_tts as tts
 from POI_STT import main as stt
 def subroutine():
-    while input():#ble 신호가 들어오면 실행
+    while True:#ble 신호가 들어오면 실행
         try:
             # 음성 입력 받기
             #tts("명령을 말씀해 주세요.", "prompt.mp3")
